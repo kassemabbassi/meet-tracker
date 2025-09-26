@@ -96,7 +96,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             </motion.div>
             <div>
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                Chkoun Hadher
+                Chkoun Hadher 
               </CardTitle>
               <CardDescription className="text-lg text-slate-600 dark:text-slate-300 mt-2">
                 {isLogin ? "Sign in to your account" : "Create your account"}

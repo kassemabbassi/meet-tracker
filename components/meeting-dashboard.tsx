@@ -374,7 +374,14 @@ export function MeetingDashboard({
                 >
                   Chkoun Hadher 
                 </motion.h1>
-                
+                <motion.p
+                  className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 dark:text-slate-300 font-medium mt-1 sm:mt-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7, duration: 0.8 }}
+                >
+                  Professional Meeting Tracker with Enhanced Security
+                </motion.p>
               </div>
             </motion.div>
           </div>
