@@ -41,6 +41,18 @@ export interface Participant {
   updated_at: string
 }
 
+export interface MeetingNote {
+  id: string
+  meeting_id: string
+  user_id: string
+  title: string
+  content: string
+  note_type: "general" | "action" | "decision" | "idea" | "issue" | "follow-up"
+  priority: "low" | "medium" | "high" | "urgent"
+  created_at: string
+  updated_at: string
+}
+
 // Auth service
 export const authService = {
   // Register new user
@@ -297,6 +309,93 @@ export const participantService = {
       return true
     } catch (error) {
       console.error("Error removing participant:", error)
+      return false
+    }
+  },
+}
+
+// Notes service
+export const notesService = {
+  // Create a new note
+  async createNote(
+    userId: string,
+    meetingId: string,
+    title: string,
+    content: string,
+    noteType: MeetingNote["note_type"] = "general",
+    priority: MeetingNote["priority"] = "medium",
+  ): Promise<MeetingNote | null> {
+    try {
+      const { data, error } = await supabase
+        .from("meeting_notes")
+        .insert([{ user_id: userId, meeting_id: meetingId, title, content, note_type: noteType, priority }])
+        .select()
+        .single()
+
+      if (error) {
+        console.error("Error creating note:", error)
+        return null
+      }
+      return data
+    } catch (error) {
+      console.error("Error creating note:", error)
+      return null
+    }
+  },
+
+  // Get all notes for a meeting
+  async getNotesByMeeting(userId: string, meetingId: string): Promise<MeetingNote[]> {
+    try {
+      const { data, error } = await supabase
+        .from("meeting_notes")
+        .select("*")
+        .eq("meeting_id", meetingId)
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        console.error("Error fetching notes:", error)
+        return []
+      }
+      return data || []
+    } catch (error) {
+      console.error("Error fetching notes:", error)
+      return []
+    }
+  },
+
+  // Update a note
+  async updateNote(
+    userId: string,
+    noteId: string,
+    updates: Partial<Pick<MeetingNote, "title" | "content" | "note_type" | "priority">>,
+  ): Promise<boolean> {
+    try {
+      const { error } = await supabase.from("meeting_notes").update(updates).eq("id", noteId).eq("user_id", userId)
+
+      if (error) {
+        console.error("Error updating note:", error)
+        return false
+      }
+      return true
+    } catch (error) {
+      console.error("Error updating note:", error)
+      return false
+    }
+  },
+
+  // Delete a note
+  async deleteNote(userId: string, noteId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase.from("meeting_notes").delete().eq("id", noteId).eq("user_id", userId)
+
+      if (error) {
+        console.error("Error deleting note:", error)
+        return false
+      }
+      return true
+    } catch (error) {
+      console.error("Error deleting note:", error)
       return false
     }
   },

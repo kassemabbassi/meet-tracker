@@ -36,10 +36,12 @@ import {
   LogOut,
   Shield,
   User,
+  FileText,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { CreateMeetingDialog } from "@/components/create-meeting-dialog"
 import { MeetingHistoryDialog } from "@/components/meeting-history-dialog"
+import { NotesPanel } from "@/components/notes/notes-panel"
 import { participantService, type Meeting, type Participant, meetingService, type AppUser } from "@/lib/supabase"
 
 interface MeetingDashboardProps {
@@ -372,7 +374,7 @@ export function MeetingDashboard({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.8 }}
                 >
-                  Chkoun Hadher 
+                  Chkoun Hadher
                 </motion.h1>
                 <motion.p
                   className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 dark:text-slate-300 font-medium mt-1 sm:mt-2"
@@ -380,13 +382,13 @@ export function MeetingDashboard({
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7, duration: 0.8 }}
                 >
-                  Professional Meeting Tracker with Enhanced Security
+                  Professional Meeting Tracker with Notes & Enhanced Security
                 </motion.p>
               </div>
             </motion.div>
           </div>
 
-          {/* User Info & Action Buttons - Enhanced */}
+          {/* User Info & Action Buttons */}
           <motion.div
             className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6"
             variants={itemVariants}
@@ -632,7 +634,7 @@ export function MeetingDashboard({
             {/* Main Content */}
             <motion.div variants={itemVariants}>
               <Tabs defaultValue="participants" className="space-y-6 sm:space-y-8">
-                <TabsList className="grid w-full grid-cols-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-blue-200 dark:border-blue-700 shadow-lg h-auto">
+                <TabsList className="grid w-full grid-cols-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-blue-200 dark:border-blue-700 shadow-lg h-auto">
                   <TabsTrigger
                     value="participants"
                     className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 text-xs sm:text-sm py-2 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
@@ -648,6 +650,14 @@ export function MeetingDashboard({
                     <Award className="h-4 w-4" />
                     <span className="hidden sm:inline">Participation</span>
                     <span className="sm:hidden">Points</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="notes"
+                    className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 text-xs sm:text-sm py-2 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span className="hidden sm:inline">Notes</span>
+                    <span className="sm:hidden">Notes</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="exports"
@@ -997,6 +1007,18 @@ export function MeetingDashboard({
                         </AnimatePresence>
                       </CardContent>
                     </Card>
+                  </motion.div>
+                </TabsContent>
+
+                {/* Notes Tab */}
+                <TabsContent value="notes" className="space-y-4 sm:space-y-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="h-[600px]"
+                  >
+                    <NotesPanel user={user} meeting={currentMeeting} />
                   </motion.div>
                 </TabsContent>
 

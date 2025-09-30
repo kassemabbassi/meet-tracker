@@ -8,7 +8,10 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Chkoun Hadher",
-    generator: 'v0.dev'
+    generator: 'v0.dev',
+    icons: {
+    icon: "/favicon.png?v=2",  
+  },
 }
 
 export default function RootLayout({
