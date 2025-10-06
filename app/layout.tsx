@@ -8,10 +8,11 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Chkoun Hadher",
-    generator: 'v0.dev',
+  description: "Professional meeting attendance and participation tracking application with enhanced security",
+    generator: 'v0.app',
     icons: {
-    icon: "/favicon.png?v=2",  
-  },
+        icon: "/favicon.png?v=2",  
+      },
 }
 
 export default function RootLayout({
@@ -21,9 +22,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.png" />
-      </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}

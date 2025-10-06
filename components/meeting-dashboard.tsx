@@ -37,11 +37,13 @@ import {
   Shield,
   User,
   FileText,
+  GraduationCap,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { CreateMeetingDialog } from "@/components/create-meeting-dialog"
 import { MeetingHistoryDialog } from "@/components/meeting-history-dialog"
 import { NotesPanel } from "@/components/notes/notes-panel"
+import { TrainingsManagement } from "@/components/trainings/trainings-management"
 import { participantService, type Meeting, type Participant, meetingService, type AppUser } from "@/lib/supabase"
 
 interface MeetingDashboardProps {
@@ -130,6 +132,7 @@ export function MeetingDashboard({
   const [sortBy, setSortBy] = useState<"name" | "points" | "joinTime">("points")
   const [isLoading, setIsLoading] = useState(false)
   const { theme, setTheme } = useTheme()
+  const [showTrainingsOnly, setShowTrainingsOnly] = useState(false)
 
   const addParticipant = async () => {
     if (!newParticipantName.trim() || !currentMeeting) return
@@ -168,7 +171,6 @@ export function MeetingDashboard({
 
     const success = await participantService.awardSpeakingPoint(user.id, participantId)
     if (success) {
-      // Refresh participants data from database to ensure accuracy
       const updatedParticipants = await participantService.getParticipantsByMeeting(user.id, currentMeeting.id)
       setParticipants(updatedParticipants)
     }
@@ -196,11 +198,10 @@ export function MeetingDashboard({
     }
   })
 
-  // Export functions
   const exportToExcel = (data: any[], filename: string) => {
     let htmlContent = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
-          xmlns:x="urn:schemas-microsoft-com:office:excel" 
+    <html xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
           xmlns="http://www.w3.org/TR/REC-html40">
     <head>
       <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
@@ -305,7 +306,6 @@ export function MeetingDashboard({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-slate-900 dark:via-blue-900 dark:to-indigo-900 transition-all duration-1000 ease-in-out relative overflow-hidden">
-      {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute -top-20 -right-20 sm:-top-40 sm:-right-40 w-40 h-40 sm:w-80 sm:h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
@@ -351,9 +351,7 @@ export function MeetingDashboard({
         initial="hidden"
         animate="visible"
       >
-        {/* Header */}
         <motion.div className="flex flex-col space-y-4 sm:space-y-6 mb-6 sm:mb-8 lg:mb-12" variants={itemVariants}>
-          {/* Title Section */}
           <div className="text-center lg:text-left">
             <motion.div
               className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-3 sm:space-y-0 sm:space-x-4"
@@ -374,7 +372,7 @@ export function MeetingDashboard({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.8 }}
                 >
-                  Chkoun Hadher
+                  Chkoun Hadher 
                 </motion.h1>
                 <motion.p
                   className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 dark:text-slate-300 font-medium mt-1 sm:mt-2"
@@ -382,13 +380,12 @@ export function MeetingDashboard({
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7, duration: 0.8 }}
                 >
-                  Professional Meeting Tracker with Notes & Enhanced Security
+                  Professional Meeting Tracker with Training Management & Notes
                 </motion.p>
               </div>
             </motion.div>
           </div>
 
-          {/* User Info & Action Buttons */}
           <motion.div
             className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6"
             variants={itemVariants}
@@ -420,6 +417,15 @@ export function MeetingDashboard({
                   onMeetingDeleted={onMeetingDeleted}
                 />
                 <CreateMeetingDialog userId={user.id} onMeetingCreated={onMeetingCreated} />
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={() => setShowTrainingsOnly(!showTrainingsOnly)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg text-sm w-full sm:w-auto"
+                  >
+                    <GraduationCap className="h-4 w-4 mr-2" />
+                    Manage Training
+                  </Button>
+                </motion.div>
               </div>
               <div className="flex items-center gap-3">
                 <motion.div whileHover={{ rotate: 180 }} whileTap={{ scale: 0.9 }}>
@@ -448,7 +454,6 @@ export function MeetingDashboard({
           </motion.div>
         </motion.div>
 
-        {/* Current Meeting Info */}
         <AnimatePresence>
           {currentMeeting && (
             <motion.div
@@ -514,7 +519,7 @@ export function MeetingDashboard({
           )}
         </AnimatePresence>
 
-        {!currentMeeting ? (
+        {!currentMeeting && !showTrainingsOnly ? (
           <motion.div
             className="text-center py-12 sm:py-16 lg:py-20"
             variants={itemVariants}
@@ -540,7 +545,7 @@ export function MeetingDashboard({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              Create secure meetings with complete data isolation. Your meetings are private and only accessible to you.
+              Create secure meetings and professional training programs with complete data isolation.
             </motion.p>
             <motion.div
               className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6"
@@ -554,11 +559,50 @@ export function MeetingDashboard({
                 onMeetingSelected={onMeetingSelected}
                 onMeetingDeleted={onMeetingDeleted}
               />
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={() => setShowTrainingsOnly(true)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg"
+                  >
+                    <GraduationCap className="h-5 w-5 mr-2" />
+                    Manage Training
+                  </Button>
+                </motion.div>
+              </motion.div>
             </motion.div>
+          </motion.div>
+        ) : showTrainingsOnly ? (
+          <motion.div variants={itemVariants} className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <motion.div
+                  className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg shadow-lg"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                >
+                  <GraduationCap className="h-6 w-6 text-white" />
+                </motion.div>
+                <div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Training Management
+                  </h2>
+                  <p className="text-slate-600 dark:text-slate-300">Create and manage professional training programs</p>
+                </div>
+              </div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  onClick={() => setShowTrainingsOnly(false)}
+                  variant="outline"
+                  className="border-purple-200 dark:border-purple-700"
+                >
+                  Back to Dashboard
+                </Button>
+              </motion.div>
+            </div>
+            <TrainingsManagement user={user} />
           </motion.div>
         ) : (
           <>
-            {/* Stats Cards */}
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8"
               variants={containerVariants}
@@ -631,10 +675,9 @@ export function MeetingDashboard({
               ))}
             </motion.div>
 
-            {/* Main Content */}
             <motion.div variants={itemVariants}>
-              <Tabs defaultValue="participants" className="space-y-6 sm:space-y-8">
-                <TabsList className="grid w-full grid-cols-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-blue-200 dark:border-blue-700 shadow-lg h-auto">
+              <Tabs defaultValue="participants" className="space-y-6 sm:space-8">
+                <TabsList className="grid w-full grid-cols-5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-blue-200 dark:border-blue-700 shadow-lg h-auto">
                   <TabsTrigger
                     value="participants"
                     className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 text-xs sm:text-sm py-2 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
@@ -660,8 +703,16 @@ export function MeetingDashboard({
                     <span className="sm:hidden">Notes</span>
                   </TabsTrigger>
                   <TabsTrigger
+                    value="trainings"
+                    className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 text-xs sm:text-sm py-2 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+                  >
+                    <GraduationCap className="h-4 w-4" />
+                    <span className="hidden sm:inline">Training</span>
+                    <span className="sm:hidden">Train</span>
+                  </TabsTrigger>
+                  <TabsTrigger
                     value="exports"
-                    className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 text-xs sm:text-sm py-2 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
+                    className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 text-xs sm:text-sm py-2 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white"
                   >
                     <Download className="h-4 w-4" />
                     <span className="hidden sm:inline">Exports</span>
@@ -669,7 +720,6 @@ export function MeetingDashboard({
                   </TabsTrigger>
                 </TabsList>
 
-                {/* Participants Tab */}
                 <TabsContent value="participants" className="space-y-4 sm:space-y-6">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -862,7 +912,6 @@ export function MeetingDashboard({
                   </motion.div>
                 </TabsContent>
 
-                {/* Participation Tab */}
                 <TabsContent value="participation" className="space-y-4 sm:space-y-6">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -916,7 +965,7 @@ export function MeetingDashboard({
                                 variants={floatingVariants}
                                 animate="animate"
                               >
-                                <Award className="h-10 w-10 sm:h-12 sm:w-12 text-white" />
+                                <Award className="h-10 w-10 sm:h-12 sm:h-12 text-white" />
                               </motion.div>
                               <h3 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                                 No participation data yet
@@ -1010,7 +1059,6 @@ export function MeetingDashboard({
                   </motion.div>
                 </TabsContent>
 
-                {/* Notes Tab */}
                 <TabsContent value="notes" className="space-y-4 sm:space-y-6">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -1022,7 +1070,16 @@ export function MeetingDashboard({
                   </motion.div>
                 </TabsContent>
 
-                {/* Exports Tab */}
+                <TabsContent value="trainings" className="space-y-4 sm:space-y-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <TrainingsManagement user={user} />
+                  </motion.div>
+                </TabsContent>
+
                 <TabsContent value="exports" className="space-y-4 sm:space-y-6">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
