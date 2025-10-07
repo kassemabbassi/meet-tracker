@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { UserPlus, Sparkles, GraduationCap } from "lucide-react"
 import { trainingRegistrationService, type Training } from "@/lib/supabase"
 
@@ -31,7 +32,9 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
     last_name: "",
     email: "",
     phone: "",
+    education_specialty: "",
     education_level: "",
+    member_type: "",
     training_level: "",
   })
 
@@ -44,23 +47,29 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
       !formData.first_name ||
       !formData.last_name ||
       !formData.email ||
+      !formData.education_specialty ||
       !formData.education_level ||
-      !formData.training_level
+      !formData.member_type
     ) {
       return
     }
 
     setIsLoading(true)
     try {
-      const registration = await trainingRegistrationService.registerParticipant({
+      const registrationPayload: any = {
         training_id: training.id,
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim() || undefined,
+        education_specialty: formData.education_specialty,
         education_level: formData.education_level,
-        training_level: formData.training_level as "beginner" | "intermediate" | "advanced",
-      })
+        member_type: formData.member_type as "adherent" | "actif",
+      }
+      if (formData.training_level) {
+        registrationPayload.training_level = formData.training_level as "beginner" | "intermediate" | "advanced"
+      }
+      const registration = await trainingRegistrationService.registerParticipant(registrationPayload)
 
       if (registration) {
         onRegistrationSuccess()
@@ -69,7 +78,9 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
           last_name: "",
           email: "",
           phone: "",
+          education_specialty: "",
           education_level: "",
+          member_type: "",
           training_level: "",
         })
         setIsOpen(false)
@@ -91,7 +102,7 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
           </Button>
         </motion.div>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[600px] bg-gradient-to-br from-white via-green-50/30 to-emerald-50/30 dark:from-slate-800 dark:via-green-900/20 dark:to-emerald-900/20 border-2 border-green-300 dark:border-green-700 mx-2 shadow-2xl">
+      <DialogContent className="w-[95vw] max-w-[700px] max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-green-50/30 to-emerald-50/30 dark:from-slate-800 dark:via-green-900/20 dark:to-emerald-900/20 border-2 border-green-300 dark:border-green-700 mx-2 shadow-2xl">
         <DialogHeader>
           <motion.div
             className="flex items-center justify-center mb-4"
@@ -164,9 +175,37 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
               type="tel"
               value={formData.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
-              placeholder="+1 234 567 8900"
+              placeholder="+216 12 345 678"
               className="h-11 border-2 border-green-200 dark:border-green-700 focus:ring-green-500"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="education_specialty" className="text-sm font-bold">
+              Education Specialty *
+            </Label>
+            <Select value={formData.education_specialty} onValueChange={(value) => handleChange("education_specialty", value)}>
+              <SelectTrigger className="h-11 border-2 border-green-200 dark:border-green-700">
+                <SelectValue placeholder="Select education specialty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="licence_science_info">Licence Science Info</SelectItem>
+                <SelectItem value="licence_eea">Licence EEA</SelectItem>
+                <SelectItem value="licence_math_applique">Licence Math Appliqué</SelectItem>
+                <SelectItem value="licence_systeme_embarque">Licence Système Embarqué</SelectItem>
+                <SelectItem value="licence_tic">Licence TIC</SelectItem>
+                <SelectItem value="cpi">CPI</SelectItem>
+                <SelectItem value="ing_info">Ing Info</SelectItem>
+                <SelectItem value="ing_micro_electronique">Ing Micro Electronique</SelectItem>
+                <SelectItem value="master_recherche_data_science">Master Recherche Data Science</SelectItem>
+                <SelectItem value="master_recherche_gl">Master Recherche GL</SelectItem>
+                <SelectItem value="master_pro_data_science">Master Pro Data Science</SelectItem>
+                <SelectItem value="master_pro_gl">Master Pro GL</SelectItem>
+                <SelectItem value="master_recherche_electronique">Master Recherche Électronique</SelectItem>
+                <SelectItem value="master_pro_electronique">Master Pro Électronique</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -178,23 +217,42 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
                 <SelectValue placeholder="Select education level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="High School">High School</SelectItem>
-                <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
-                <SelectItem value="Master's Degree">Master's Degree</SelectItem>
-                <SelectItem value="Engineering Degree">Engineering Degree</SelectItem>
-                <SelectItem value="PhD">PhD</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+                <SelectItem value="1">Level 1</SelectItem>
+                <SelectItem value="2">Level 2</SelectItem>
+                <SelectItem value="3">Level 3</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
+            <Label className="text-sm font-bold mb-3 block">
+              Member Type *
+            </Label>
+            <RadioGroup value={formData.member_type} onValueChange={(value) => handleChange("member_type", value)}>
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="adherent" id="adherent" className="border-green-500 text-green-500" />
+                  <Label htmlFor="adherent" className="cursor-pointer font-normal">
+                    Adherent Member
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="actif" id="actif" className="border-green-500 text-green-500" />
+                  <Label htmlFor="actif" className="cursor-pointer font-normal">
+                    Active Member
+                  </Label>
+                </div>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div>
             <Label htmlFor="training_level" className="text-sm font-bold">
-              Training Level *
+              Training Level
             </Label>
             <Select value={formData.training_level} onValueChange={(value) => handleChange("training_level", value)}>
               <SelectTrigger className="h-11 border-2 border-green-200 dark:border-green-700">
-                <SelectValue placeholder="Select training level" />
+                <SelectValue placeholder="Select training level (optional)" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="beginner">🌱 Beginner</SelectItem>
@@ -221,8 +279,9 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
                 !formData.first_name ||
                 !formData.last_name ||
                 !formData.email ||
+                !formData.education_specialty ||
                 !formData.education_level ||
-                !formData.training_level ||
+                !formData.member_type ||
                 isLoading
               }
               className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-xl h-11 font-bold"

@@ -22,6 +22,9 @@ import {
   Trash2,
   Search,
   Award,
+  GraduationCap,
+  UserCircle,
+  Calendar,
 } from "lucide-react"
 import { trainingRegistrationService, type Training, type TrainingRegistration } from "@/lib/supabase"
 
@@ -57,6 +60,39 @@ const levelConfig = {
     borderColor: "border-purple-200 dark:border-purple-700",
     textColor: "text-purple-700 dark:text-purple-300",
     emoji: "⭐",
+  },
+}
+
+const educationSpecialtyLabels: Record<string, string> = {
+  licence_science_info: "Licence Science Info",
+  licence_eea: "Licence EEA",
+  licence_math_applique: "Licence Math Appliqué",
+  licence_systeme_embarque: "Licence Système Embarqué",
+  licence_tic: "Licence TIC",
+  cpi: "CPI",
+  ing_info: "Ing Info",
+  ing_micro_electronique: "Ing Micro Électronique",
+  master_recherche_data_science: "Master Recherche Data Science",
+  master_recherche_gl: "Master Recherche GL",
+  master_pro_data_science: "Master Pro Data Science",
+  master_pro_gl: "Master Pro GL",
+  master_recherche_electronique: "Master Recherche Électronique",
+  master_pro_electronique: "Master Pro Électronique",
+  other: "Autre",
+}
+
+const memberTypeConfig = {
+  adherent: {
+    label: "Adherent Member",
+    color: "bg-blue-500 text-white",
+    icon: "👥",
+    gradient: "from-blue-400 to-blue-600",
+  },
+  actif: {
+    label: "Active Member",
+    color: "bg-purple-500 text-white",
+    icon: "⚡",
+    gradient: "from-purple-400 to-purple-600",
   },
 }
 
@@ -106,77 +142,128 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
   }
 
   const ParticipantCard = ({ participant, index }: { participant: TrainingRegistration; index: number }) => {
-    const levelInfo = levelConfig[participant.training_level]
+    const levelInfo = participant.training_level ? levelConfig[participant.training_level] : null
+    const memberInfo = memberTypeConfig[participant.member_type as keyof typeof memberTypeConfig]
+    
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, x: -20 }}
         transition={{ delay: index * 0.05 }}
-        whileHover={{ scale: 1.02, y: -2 }}
+        whileHover={{ scale: 1.01, y: -2 }}
       >
-        <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-2 border-slate-200 dark:border-slate-700 hover:shadow-2xl transition-all duration-300 overflow-hidden group">
+        <Card className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-900/50 backdrop-blur-sm border-2 border-slate-200 dark:border-slate-700 hover:shadow-2xl hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <CardContent className="p-5 relative">
-            <div className="flex items-start justify-between gap-4">
+          
+          <CardContent className="p-6 relative">
+            {/* Header Section with Name and Actions */}
+            <div className="flex items-start justify-between gap-4 mb-5">
               <div className="flex items-center gap-4 flex-1 min-w-0">
                 <motion.div
-                  className={`w-14 h-14 bg-gradient-to-br ${levelInfo.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}
+                  className={`w-16 h-16 bg-gradient-to-br ${memberInfo.gradient} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-xl`}
                   whileHover={{ scale: 1.1, rotate: 5 }}
                 >
-                  <User className="h-7 w-7 text-white" />
+                  <User className="h-8 w-8 text-white" />
                 </motion.div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-lg text-slate-800 dark:text-slate-100 truncate">
+                  <h4 className="font-bold text-xl text-slate-800 dark:text-slate-100 mb-2">
                     {participant.first_name} {participant.last_name}
                   </h4>
-                  <div className="flex flex-col gap-1 mt-2">
-                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                      <Mail className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span className="truncate">{participant.email}</span>
-                    </div>
-                    {participant.phone && (
-                      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                        <Phone className="h-3.5 w-3.5 flex-shrink-0" />
-                        <span>{participant.phone}</span>
-                      </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge className={`${memberInfo.color} font-semibold shadow-md px-3 py-1`}>
+                      <span className="mr-1.5">{memberInfo.icon}</span>
+                      {memberInfo.label}
+                    </Badge>
+                    {levelInfo && (
+                      <Badge className={`bg-gradient-to-r ${levelInfo.color} text-white font-semibold shadow-md px-3 py-1`}>
+                        <span className="mr-1.5">{levelInfo.emoji}</span>
+                        {levelInfo.label}
+                      </Badge>
                     )}
-                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                      <BookOpen className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span>{participant.education_level}</span>
-                    </div>
-                    <Badge className={`w-fit bg-gradient-to-r ${levelInfo.color} text-white border-0 shadow-lg mt-1`}>
-                      <span className="mr-1">{levelInfo.emoji}</span>
-                      {levelInfo.label}
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md px-3 py-1">
+                      <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                      Enrolled
                     </Badge>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Enrolled
-                </Badge>
-                <motion.div whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.9 }}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteParticipant(participant.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-2 border-red-200 dark:border-red-700 shadow-lg"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </motion.div>
+              <motion.div whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.9 }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDeleteParticipant(participant.id)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-2 border-red-200 dark:border-red-700 shadow-lg h-10 w-10 p-0"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </motion.div>
+            </div>
+
+            {/* Information Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Contact Information Section */}
+              <div className="space-y-3">
+                <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  Contact Information
+                </div>
+                <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 rounded-lg p-3 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 transition-colors">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Mail className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="truncate font-medium">{participant.email}</span>
+                </div>
+                {participant.phone && (
+                  <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 rounded-lg p-3 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 transition-colors">
+                    <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Phone className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium">{participant.phone}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Education Information Section */}
+              <div className="space-y-3">
+                <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  Education Details
+                </div>
+                <div className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <GraduationCap className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold text-slate-800 dark:text-slate-100">
+                      {educationSpecialtyLabels[participant.education_specialty] || participant.education_specialty}
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 flex items-center gap-1">
+                      <Award className="h-3 w-3" />
+                      Education Level: <span className="font-semibold">{participant.education_level}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400">
-              Enrolled on{" "}
-              {new Date(participant.registration_date).toLocaleDateString("en-US", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+
+            {/* Footer with Registration Date */}
+            <div className="mt-5 pt-4 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <Calendar className="h-4 w-4" />
+                <span className="font-medium">
+                  Enrolled on{" "}
+                  {new Date(participant.registration_date).toLocaleDateString("en-US", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+              <div className="text-xs text-slate-400 dark:text-slate-500">
+                {new Date(participant.registration_date).toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>

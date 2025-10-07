@@ -76,10 +76,12 @@ export interface TrainingRegistration {
   last_name: string
   email: string
   phone?: string
-  education_level: string
-  training_level: "beginner" | "intermediate" | "advanced"
+  education_specialty: string  // Add this
+  education_level: number       // Change from string to number
+  member_type: "adherent" | "actif"  // Add this
+  training_level?: "beginner" | "intermediate" | "advanced"  // Make optional
   registration_date: string
-  status: "registered" | "attended" | "cancelled"
+  status: string
   notes?: string
   created_at: string
   updated_at: string

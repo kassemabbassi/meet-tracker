@@ -15,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Users, Mail, Phone, BookOpen, User, CheckCircle, Star, Rocket, Sparkles } from "lucide-react"
+import { Users, Mail, Phone, BookOpen, User, CheckCircle, Star, Rocket, Sparkles, GraduationCap, Award, UserCircle } from "lucide-react"
 import { trainingRegistrationService, type Training, type TrainingRegistration } from "@/lib/supabase"
 
 interface TrainingParticipantsDialogProps {
@@ -52,6 +52,37 @@ const levelConfig = {
   },
 }
 
+const educationSpecialtyLabels: Record<string, string> = {
+  licence_science_info: "Licence Science Info",
+  licence_eea: "Licence EEA",
+  licence_math_applique: "Licence Math Appliqué",
+  licence_systeme_embarque: "Licence Système Embarqué",
+  licence_tic: "Licence TIC",
+  cpi: "CPI",
+  ing_info: "Ing Info",
+  ing_micro_electronique: "Ing Micro Électronique",
+  master_recherche_data_science: "Master Recherche Data Science",
+  master_recherche_gl: "Master Recherche GL",
+  master_pro_data_science: "Master Pro Data Science",
+  master_pro_gl: "Master Pro GL",
+  master_recherche_electronique: "Master Recherche Électronique",
+  master_pro_electronique: "Master Pro Électronique",
+  other: "Autre",
+}
+
+const memberTypeConfig = {
+  adherent: {
+    label: "Membre Adhérent",
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200",
+    icon: "👥",
+  },
+  actif: {
+    label: "Membre Actif",
+    color: "bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200",
+    icon: "⚡",
+  },
+}
+
 export function TrainingParticipantsDialog({ training }: TrainingParticipantsDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [participants, setParticipants] = useState<TrainingRegistration[]>([])
@@ -81,49 +112,93 @@ export function TrainingParticipantsDialog({ training }: TrainingParticipantsDia
     advanced: participants.filter((p) => p.training_level === "advanced"),
   }
 
-  const ParticipantCard = ({ participant, index }: { participant: TrainingRegistration; index: number }) => (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
-      <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between space-x-4">
-            <div className="flex items-center space-x-3 flex-1 min-w-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-                <User className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-lg text-slate-800 dark:text-slate-100 truncate">
-                  {participant.first_name} {participant.last_name}
-                </h4>
-                <div className="flex flex-col space-y-1 mt-1">
-                  <div className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-300">
-                    <Mail className="h-3 w-3 flex-shrink-0" />
-                    <span className="truncate">{participant.email}</span>
+  const ParticipantCard = ({ participant, index }: { participant: TrainingRegistration; index: number }) => {
+    const memberConfig = memberTypeConfig[participant.member_type as keyof typeof memberTypeConfig]
+    const trainingLevelConfig = participant.training_level 
+      ? levelConfig[participant.training_level as keyof typeof levelConfig]
+      : null
+
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ delay: index * 0.05 }}
+      >
+        <Card className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-2 border-slate-200 dark:border-slate-700 hover:shadow-xl hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between space-x-4 mb-4">
+              <div className="flex items-center space-x-4 flex-1 min-w-0">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-400 via-pink-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <User className="h-7 w-7 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-xl text-slate-800 dark:text-slate-100 truncate mb-1">
+                    {participant.first_name} {participant.last_name}
+                  </h4>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge className={`${memberConfig.color} font-semibold`}>
+                      <span className="mr-1">{memberConfig.icon}</span>
+                      {memberConfig.label}
+                    </Badge>
+                    {trainingLevelConfig && (
+                      <Badge className={`bg-gradient-to-r ${trainingLevelConfig.color} text-white font-semibold`}>
+                        <span className="mr-1">{trainingLevelConfig.emoji}</span>
+                        {trainingLevelConfig.label}
+                      </Badge>
+                    )}
                   </div>
-                  {participant.phone && (
-                    <div className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-300">
-                      <Phone className="h-3 w-3 flex-shrink-0" />
-                      <span>{participant.phone}</span>
+                </div>
+              </div>
+              <Badge className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200 flex-shrink-0">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Inscrit
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-lg p-2">
+                  <Mail className="h-4 w-4 flex-shrink-0 text-purple-500" />
+                  <span className="truncate font-medium">{participant.email}</span>
+                </div>
+                {participant.phone && (
+                  <div className="flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-lg p-2">
+                    <Phone className="h-4 w-4 flex-shrink-0 text-green-500" />
+                    <span className="font-medium">{participant.phone}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-start space-x-2 text-sm text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-lg p-2">
+                  <GraduationCap className="h-4 w-4 flex-shrink-0 text-blue-500 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="font-semibold">
+                      {educationSpecialtyLabels[participant.education_specialty] || participant.education_specialty}
                     </div>
-                  )}
-                  <div className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-300">
-                    <BookOpen className="h-3 w-3 flex-shrink-0" />
-                    <span>{participant.education_level}</span>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Niveau {participant.education_level}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <Badge className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200 flex-shrink-0">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Inscrit
-            </Badge>
-          </div>
-          <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Inscrit le {new Date(participant.registration_date).toLocaleDateString("fr-FR")}
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  )
+
+            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center">
+                <Award className="h-3 w-3 mr-1" />
+                Inscrit le {new Date(participant.registration_date).toLocaleDateString("fr-FR", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric"
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    )
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
