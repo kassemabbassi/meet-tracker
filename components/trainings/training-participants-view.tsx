@@ -35,9 +35,10 @@ interface TrainingParticipantsViewProps {
 
 const levelConfig = {
   beginner: {
-    label: "Beginners",
+    label: "Beginner",
     icon: Sparkles,
     color: "from-green-400 to-emerald-500",
+    avatarColor: "bg-gradient-to-br from-green-400 to-emerald-500",
     bgColor: "from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20",
     borderColor: "border-green-200 dark:border-green-700",
     textColor: "text-green-700 dark:text-green-300",
@@ -47,6 +48,7 @@ const levelConfig = {
     label: "Intermediate",
     icon: Rocket,
     color: "from-blue-400 to-cyan-500",
+    avatarColor: "bg-gradient-to-br from-blue-400 to-cyan-500",
     bgColor: "from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20",
     borderColor: "border-blue-200 dark:border-blue-700",
     textColor: "text-blue-700 dark:text-blue-300",
@@ -56,6 +58,7 @@ const levelConfig = {
     label: "Advanced",
     icon: Star,
     color: "from-purple-400 to-pink-500",
+    avatarColor: "bg-gradient-to-br from-purple-400 to-pink-500",
     bgColor: "from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20",
     borderColor: "border-purple-200 dark:border-purple-700",
     textColor: "text-purple-700 dark:text-purple-300",
@@ -142,103 +145,93 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
   }
 
   const ParticipantCard = ({ participant, index }: { participant: TrainingRegistration; index: number }) => {
-    const levelInfo = participant.training_level ? levelConfig[participant.training_level] : null
+    const levelInfo = participant.training_level ? levelConfig[participant.training_level] : levelConfig.beginner
     const memberInfo = memberTypeConfig[participant.member_type as keyof typeof memberTypeConfig]
     
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, x: -20 }}
         transition={{ delay: index * 0.05 }}
-        whileHover={{ scale: 1.01, y: -2 }}
       >
-        <Card className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-900/50 backdrop-blur-sm border-2 border-slate-200 dark:border-slate-700 hover:shadow-2xl hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          
-          <CardContent className="p-6 relative">
-            {/* Header Section with Name and Actions */}
-            <div className="flex items-start justify-between gap-4 mb-5">
-              <div className="flex items-center gap-4 flex-1 min-w-0">
-                <motion.div
-                  className={`w-16 h-16 bg-gradient-to-br ${memberInfo.gradient} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-xl`}
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                >
-                  <User className="h-8 w-8 text-white" />
-                </motion.div>
+        <Card className="border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-4">
+            {/* Header Section */}
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className={`w-12 h-12 ${levelInfo.avatarColor} rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
+                  <User className="h-6 w-6 text-white" />
+                </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-xl text-slate-800 dark:text-slate-100 mb-2">
+                  <h4 className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">
                     {participant.first_name} {participant.last_name}
                   </h4>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge className={`${memberInfo.color} font-semibold shadow-md px-3 py-1`}>
-                      <span className="mr-1.5">{memberInfo.icon}</span>
-                      {memberInfo.label}
-                    </Badge>
-                    {levelInfo && (
-                      <Badge className={`bg-gradient-to-r ${levelInfo.color} text-white font-semibold shadow-md px-3 py-1`}>
-                        <span className="mr-1.5">{levelInfo.emoji}</span>
-                        {levelInfo.label}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {memberInfo && (
+                      <Badge className={`${memberInfo.color} font-medium text-xs px-2 py-1`}>
+                        {memberInfo.label}
                       </Badge>
                     )}
-                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md px-3 py-1">
-                      <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                    <Badge className={`bg-gradient-to-r ${levelInfo.color} text-white font-medium text-xs px-2 py-1`}>
+                      {levelInfo.emoji} {levelInfo.label}
+                    </Badge>
+                    <Badge className="bg-green-500 text-white border-0 text-xs px-2 py-1">
+                      <CheckCircle className="h-3 w-3 mr-1" />
                       Enrolled
                     </Badge>
                   </div>
                 </div>
               </div>
-              <motion.div whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.9 }}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDeleteParticipant(participant.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-2 border-red-200 dark:border-red-700 shadow-lg h-10 w-10 p-0"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </motion.div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDeleteParticipant(participant.id)}
+                className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0 flex-shrink-0"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
 
-            {/* Information Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Contact Information Section */}
+            {/* Contact & Education - Responsive Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* Contact Information */}
               <div className="space-y-3">
-                <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   Contact Information
                 </div>
-                <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 rounded-lg p-3 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 transition-colors">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Mail className="h-4 w-4 text-white" />
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded flex items-center justify-center flex-shrink-0">
+                    <Mail className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <span className="truncate font-medium">{participant.email}</span>
+                  <span className="text-gray-700 dark:text-gray-300 truncate">{participant.email}</span>
                 </div>
                 {participant.phone && (
-                  <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 rounded-lg p-3 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 transition-colors">
-                    <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Phone className="h-4 w-4 text-white" />
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded flex items-center justify-center flex-shrink-0">
+                      <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
                     </div>
-                    <span className="font-medium">{participant.phone}</span>
+                    <span className="text-gray-700 dark:text-gray-300">{participant.phone}</span>
                   </div>
                 )}
               </div>
 
-              {/* Education Information Section */}
+              {/* Education Details */}
               <div className="space-y-3">
-                <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   Education Details
                 </div>
-                <div className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <GraduationCap className="h-4 w-4 text-white" />
+                <div className="flex items-start gap-3 text-sm">
+                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <GraduationCap className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex-1">
-                    <div className="font-bold text-slate-800 dark:text-slate-100">
+                    <div className="font-semibold text-gray-900 dark:text-gray-100">
                       {educationSpecialtyLabels[participant.education_specialty] || participant.education_specialty}
                     </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 flex items-center gap-1">
+                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1">
                       <Award className="h-3 w-3" />
-                      Education Level: <span className="font-semibold">{participant.education_level}</span>
+                      Education Level: <span className="font-medium">{participant.education_level}</span>
                     </div>
                   </div>
                 </div>
@@ -246,19 +239,19 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
             </div>
 
             {/* Footer with Registration Date */}
-            <div className="mt-5 pt-4 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                <Calendar className="h-4 w-4" />
+            <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <Calendar className="h-3.5 w-3.5" />
                 <span className="font-medium">
                   Enrolled on{" "}
                   {new Date(participant.registration_date).toLocaleDateString("en-US", {
                     day: "numeric",
-                    month: "long",
+                    month: "short",
                     year: "numeric",
                   })}
                 </span>
               </div>
-              <div className="text-xs text-slate-400 dark:text-slate-500">
+              <div className="text-xs text-gray-400 dark:text-gray-500">
                 {new Date(participant.registration_date).toLocaleTimeString("en-US", {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -274,90 +267,75 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Button
-            variant="outline"
-            className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-2 border-purple-300 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/50 text-purple-600 dark:text-purple-400 shadow-lg font-bold"
-          >
-            <Users className="h-4 w-4 mr-2" />
-            View Participants ({participants.length})
-          </Button>
-        </motion.div>
+        <Button
+          variant="outline"
+          className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          <Users className="h-4 w-4 mr-2" />
+          View Participants ({participants.length})
+        </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-7xl w-[95vw] h-[90vh] bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 dark:from-slate-800 dark:via-purple-900/20 dark:to-pink-900/20 border-2 border-purple-300 dark:border-purple-700 flex flex-col overflow-hidden p-0 shadow-2xl">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b-2 border-purple-200 dark:border-purple-700 flex-shrink-0 bg-gradient-to-r from-purple-100/50 to-pink-100/50 dark:from-purple-900/30 dark:to-pink-900/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <motion.div
-                className="p-3 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-xl shadow-xl"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-              >
-                <Users className="h-6 w-6 text-white" />
-              </motion.div>
+      <DialogContent className="max-w-6xl w-[95vw] h-[90vh] sm:h-[85vh] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 flex flex-col overflow-hidden p-0">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg">
+                <Users className="h-5 w-5 text-white" />
+              </div>
               <div>
-                <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <DialogTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
                   Training Participants
                 </DialogTitle>
-                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium">{training.title}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-2">{training.title}</p>
               </div>
             </div>
-            <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-lg text-base px-4 py-2">
-              <Award className="h-4 w-4 mr-2" />
+            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 text-sm px-3 py-1 w-fit">
               {participants.length} Total
             </Badge>
           </div>
 
           {/* Search Bar */}
           <div className="mt-4 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-purple-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search participants by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 h-12 text-base border-2 border-purple-200 dark:border-purple-700 focus:ring-purple-500 bg-white/80 dark:bg-slate-800/80 rounded-xl shadow-lg"
+              className="pl-10 h-10 text-sm border border-gray-300 dark:border-gray-600 focus:ring-blue-500 bg-white dark:bg-gray-800"
             />
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden p-6">
+        <div className="flex-1 overflow-hidden p-4 sm:p-6">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
-              <motion.div
-                className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-              />
+              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : filteredParticipants.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <motion.div
-                  className="mx-auto w-24 h-24 bg-gradient-to-br from-purple-400 via-pink-500 to-rose-500 rounded-full flex items-center justify-center mb-6 shadow-2xl"
-                  animate={{ y: [-10, 10, -10] }}
-                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                >
+                <div className="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                   {searchTerm ? (
-                    <Search className="h-12 w-12 text-white" />
+                    <Search className="h-8 w-8 text-gray-400" />
                   ) : (
-                    <Users className="h-12 w-12 text-white" />
+                    <Users className="h-8 w-8 text-gray-400" />
                   )}
-                </motion.div>
-                <h3 className="text-2xl font-bold text-slate-600 dark:text-slate-300 mb-2">
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   {searchTerm ? "No participants found" : "No participants yet"}
                 </h3>
-                <p className="text-slate-500 dark:text-slate-400 text-lg">
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
                   {searchTerm ? "Try adjusting your search terms" : "Participants will appear here once they enroll"}
                 </p>
               </div>
             </div>
           ) : training.status === "completed" ? (
             <Tabs defaultValue="all" className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-2 border-purple-200 dark:border-purple-700 mb-6 h-14 p-1 rounded-xl">
+              <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 mb-4 p-1 rounded-lg">
                 <TabsTrigger
                   value="all"
-                  className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white font-bold"
+                  className="text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-blue-400"
                 >
-                  <Users className="h-4 w-4 mr-2" />
                   All ({filteredParticipants.length})
                 </TabsTrigger>
                 {Object.entries(groupedParticipants).map(([level, parts]) => {
@@ -366,9 +344,9 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
                     <TabsTrigger
                       key={level}
                       value={level}
-                      className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white font-bold"
+                      className="text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-blue-400"
                     >
-                      <span className="mr-2">{config.emoji}</span>
+                      <span className="hidden sm:inline mr-1">{config.emoji}</span>
                       {config.label} ({parts.length})
                     </TabsTrigger>
                   )
@@ -376,7 +354,7 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
               </TabsList>
 
               <TabsContent value="all" className="flex-1 overflow-hidden mt-0">
-                <ScrollArea className="h-full pr-4">
+                <ScrollArea className="h-full pr-2 sm:pr-4">
                   <div className="space-y-4">
                     <AnimatePresence>
                       {filteredParticipants.map((participant, index) => (
@@ -394,14 +372,16 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
                     {parts.length === 0 ? (
                       <div className="flex items-center justify-center h-full">
                         <div className="text-center">
-                          <config.icon className={`h-20 w-20 mx-auto mb-6 ${config.textColor}`} />
-                          <h3 className="text-2xl font-bold text-slate-600 dark:text-slate-300 mb-2">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${config.avatarColor}`}>
+                            <config.icon className="h-6 w-6 text-white" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                             No {config.label.toLowerCase()} participants
                           </h3>
                         </div>
                       </div>
                     ) : (
-                      <ScrollArea className="h-full pr-4">
+                      <ScrollArea className="h-full pr-2 sm:pr-4">
                         <div className="space-y-4">
                           <AnimatePresence>
                             {parts.map((participant, index) => (
@@ -416,7 +396,7 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
               })}
             </Tabs>
           ) : (
-            <ScrollArea className="h-full pr-4">
+            <ScrollArea className="h-full pr-2 sm:pr-4">
               <div className="space-y-4">
                 <AnimatePresence>
                   {filteredParticipants.map((participant, index) => (
