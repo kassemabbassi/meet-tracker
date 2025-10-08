@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -13,17 +12,14 @@ import {
   Users,
   Mail,
   Phone,
-  BookOpen,
+  GraduationCap,
   User,
   CheckCircle,
   Star,
   Rocket,
-  Sparkles,
   Trash2,
   Search,
   Award,
-  GraduationCap,
-  UserCircle,
   Calendar,
 } from "lucide-react"
 import { trainingRegistrationService, type Training, type TrainingRegistration } from "@/lib/supabase"
@@ -36,33 +32,24 @@ interface TrainingParticipantsViewProps {
 const levelConfig = {
   beginner: {
     label: "Beginner",
-    icon: Sparkles,
-    color: "from-green-400 to-emerald-500",
-    avatarColor: "bg-gradient-to-br from-green-400 to-emerald-500",
-    bgColor: "from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20",
+    icon: Rocket,
+    color: "bg-green-600",
     borderColor: "border-green-200 dark:border-green-700",
     textColor: "text-green-700 dark:text-green-300",
-    emoji: "🌱",
   },
   intermediate: {
     label: "Intermediate",
-    icon: Rocket,
-    color: "from-blue-400 to-cyan-500",
-    avatarColor: "bg-gradient-to-br from-blue-400 to-cyan-500",
-    bgColor: "from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20",
+    icon: Star,
+    color: "bg-blue-600",
     borderColor: "border-blue-200 dark:border-blue-700",
     textColor: "text-blue-700 dark:text-blue-300",
-    emoji: "🚀",
   },
   advanced: {
     label: "Advanced",
-    icon: Star,
-    color: "from-purple-400 to-pink-500",
-    avatarColor: "bg-gradient-to-br from-purple-400 to-pink-500",
-    bgColor: "from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20",
+    icon: Award,
+    color: "bg-purple-600",
     borderColor: "border-purple-200 dark:border-purple-700",
     textColor: "text-purple-700 dark:text-purple-300",
-    emoji: "⭐",
   },
 }
 
@@ -81,21 +68,17 @@ const educationSpecialtyLabels: Record<string, string> = {
   master_pro_gl: "Master Pro GL",
   master_recherche_electronique: "Master Recherche Électronique",
   master_pro_electronique: "Master Pro Électronique",
-  other: "Autre",
+  other: "Other",
 }
 
 const memberTypeConfig = {
   adherent: {
     label: "Adherent Member",
-    color: "bg-blue-500 text-white",
-    icon: "👥",
-    gradient: "from-blue-400 to-blue-600",
+    color: "bg-blue-600 text-white",
   },
   actif: {
     label: "Active Member",
-    color: "bg-purple-500 text-white",
-    icon: "⚡",
-    gradient: "from-purple-400 to-purple-600",
+    color: "bg-purple-600 text-white",
   },
 }
 
@@ -144,123 +127,116 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
     advanced: filteredParticipants.filter((p) => p.training_level === "advanced"),
   }
 
-  const ParticipantCard = ({ participant, index }: { participant: TrainingRegistration; index: number }) => {
+  const ParticipantCard = ({ participant }: { participant: TrainingRegistration }) => {
     const levelInfo = participant.training_level ? levelConfig[participant.training_level] : levelConfig.beginner
     const memberInfo = memberTypeConfig[participant.member_type as keyof typeof memberTypeConfig]
-    
+
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        transition={{ delay: index * 0.05 }}
-      >
-        <Card className="border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200">
-          <CardContent className="p-4">
-            {/* Header Section */}
-            <div className="flex items-start justify-between gap-3 mb-4">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className={`w-12 h-12 ${levelInfo.avatarColor} rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
-                  <User className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">
-                    {participant.first_name} {participant.last_name}
-                  </h4>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {memberInfo && (
-                      <Badge className={`${memberInfo.color} font-medium text-xs px-2 py-1`}>
-                        {memberInfo.label}
-                      </Badge>
-                    )}
-                    <Badge className={`bg-gradient-to-r ${levelInfo.color} text-white font-medium text-xs px-2 py-1`}>
-                      {levelInfo.emoji} {levelInfo.label}
+      <Card className="border border-gray-200 dark:border-gray-700">
+        <CardContent className="p-4">
+          {/* Header Section */}
+          <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div className={`w-8 sm:w-10 h-8 sm:h-10 ${levelInfo.color} rounded-full flex items-center justify-center flex-shrink-0`}>
+                <User className="h-4 sm:h-5 w-4 sm:w-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">
+                  {participant.first_name} {participant.last_name}
+                </h4>
+                <div className="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2">
+                  {memberInfo && (
+                    <Badge className={`${memberInfo.color} font-medium text-xs px-1 sm:px-2 py-0.5 sm:py-1`}>
+                      {memberInfo.label}
                     </Badge>
-                    <Badge className="bg-green-500 text-white border-0 text-xs px-2 py-1">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Enrolled
-                    </Badge>
-                  </div>
+                  )}
+                  <Badge className={`${levelInfo.color} text-white font-medium text-xs px-1 sm:px-2 py-0.5 sm:py-1`}>
+                    {levelInfo.label}
+                  </Badge>
+                  <Badge className="bg-green-600 text-white border-0 text-xs px-1 sm:px-2 py-0.5 sm:py-1">
+                    <CheckCircle className="h-2 sm:h-3 w-2 sm:w-3 mr-0.5 sm:mr-1" />
+                    Enrolled
+                  </Badge>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDeleteParticipant(participant.id)}
-                className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0 flex-shrink-0"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDeleteParticipant(participant.id)}
+              className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-6 sm:h-8 w-6 sm:w-8 p-0 flex-shrink-0"
+            >
+              <Trash2 className="h-3 sm:h-4 w-3 sm:w-4" />
+            </Button>
+          </div>
+
+          {/* Contact & Education - Responsive Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-2 sm:mb-4">
+            {/* Contact Information */}
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Contact Information
+              </div>
+              <div className="flex items-center gap-1 sm:gap-2 text-sm">
+                <div className="w-5 sm:w-7 h-5 sm:h-7 bg-blue-100 dark:bg-blue-900/30 rounded flex items-center justify-center flex-shrink-0">
+                  <Mail className="h-3 sm:h-4 w-3 sm:w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-gray-700 dark:text-gray-300 truncate">{participant.email}</span>
+              </div>
+              {participant.phone && (
+                <div className="flex items-center gap-1 sm:gap-2 text-sm">
+                  <div className="w-5 sm:w-7 h-5 sm:h-7 bg-green-100 dark:bg-green-900/30 rounded flex items-center justify-center flex-shrink-0">
+                    <Phone className="h-3 sm:h-4 w-3 sm:w-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <span className="text-gray-700 dark:text-gray-300">{participant.phone}</span>
+                </div>
+              )}
             </div>
 
-            {/* Contact & Education - Responsive Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              {/* Contact Information */}
-              <div className="space-y-3">
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                  Contact Information
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded flex items-center justify-center flex-shrink-0">
-                    <Mail className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <span className="text-gray-700 dark:text-gray-300 truncate">{participant.email}</span>
-                </div>
-                {participant.phone && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded flex items-center justify-center flex-shrink-0">
-                      <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="text-gray-700 dark:text-gray-300">{participant.phone}</span>
-                  </div>
-                )}
+            {/* Education Details */}
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Education Details
               </div>
-
-              {/* Education Details */}
-              <div className="space-y-3">
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                  Education Details
+              <div className="flex items-start gap-1 sm:gap-2 text-sm">
+                <div className="w-5 sm:w-7 h-5 sm:h-7 bg-purple-100 dark:bg-purple-900/30 rounded flex items-center justify-center flex-shrink-0 mt-0 sm:mt-0.5">
+                  <GraduationCap className="h-3 sm:h-4 w-3 sm:w-4 text-purple-600 dark:text-purple-400" />
                 </div>
-                <div className="flex items-start gap-3 text-sm">
-                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <GraduationCap className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {educationSpecialtyLabels[participant.education_specialty] || participant.education_specialty}
                   </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900 dark:text-gray-100">
-                      {educationSpecialtyLabels[participant.education_specialty] || participant.education_specialty}
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1">
-                      <Award className="h-3 w-3" />
-                      Education Level: <span className="font-medium">{participant.education_level}</span>
-                    </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 flex items-center gap-0.5 sm:gap-1">
+                    <Award className="h-2 sm:h-3 w-2 sm:w-3" />
+                    Education Level: <span className="font-medium">{participant.education_level}</span>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Footer with Registration Date */}
-            <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <Calendar className="h-3.5 w-3.5" />
-                <span className="font-medium">
-                  Enrolled on{" "}
-                  {new Date(participant.registration_date).toLocaleDateString("en-US", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </span>
-              </div>
-              <div className="text-xs text-gray-400 dark:text-gray-500">
-                {new Date(participant.registration_date).toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
+          {/* Footer with Registration Date */}
+          <div className="pt-2 sm:pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+            <div className="flex items-center gap-1 sm:gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <Calendar className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
+              <span className="font-medium">
+                Enrolled on{" "}
+                {new Date(participant.registration_date).toLocaleDateString("en-US", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
                 })}
-              </div>
+              </span>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+            <div className="text-xs text-gray-400 dark:text-gray-500">
+              {new Date(participant.registration_date).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -269,72 +245,72 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-md flex items-center text-sm sm:text-base"
         >
-          <Users className="h-4 w-4 mr-2" />
+          <Users className="h-4 w-4 mr-1 sm:mr-2" />
           View Participants ({participants.length})
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-6xl w-[95vw] h-[90vh] sm:h-[85vh] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 flex flex-col overflow-hidden p-0">
-        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg">
-                <Users className="h-5 w-5 text-white" />
+      <DialogContent className="w-[95vw] max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl h-[75vh] sm:h-[85vh] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden rounded-lg p-0">
+        <DialogHeader className="px-2 sm:px-4 pt-2 sm:pt-4 pb-2 sm:pb-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="p-1 sm:p-2 bg-blue-600 rounded">
+                <Users className="h-4 sm:h-5 w-4 sm:w-5 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+                <DialogTitle className="text-sm sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
                   Training Participants
                 </DialogTitle>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-2">{training.title}</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 line-clamp-2">{training.title}</p>
               </div>
             </div>
-            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 text-sm px-3 py-1 w-fit">
+            <Badge className="bg-blue-600 text-white border-0 text-xs sm:text-sm px-1.5 sm:px-3 py-0.5 sm:py-1 w-fit">
               {participants.length} Total
             </Badge>
           </div>
 
           {/* Search Bar */}
-          <div className="mt-4 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="mt-2 sm:mt-4 relative">
+            <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 sm:h-4 w-3 sm:w-4 text-gray-400" />
             <Input
               placeholder="Search participants by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-10 text-sm border border-gray-300 dark:border-gray-600 focus:ring-blue-500 bg-white dark:bg-gray-800"
+              className="pl-8 sm:pl-10 h-8 sm:h-10 text-xs sm:text-sm border-gray-300 dark:border-gray-600 focus:ring-blue-500 bg-white dark:bg-gray-800"
             />
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden p-4 sm:p-6">
+        <div className="flex-1 overflow-hidden p-2 sm:p-4">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 sm:w-8 h-6 sm:h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : filteredParticipants.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                <div className="mx-auto w-8 sm:w-12 h-8 sm:h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2 sm:mb-4">
                   {searchTerm ? (
-                    <Search className="h-8 w-8 text-gray-400" />
+                    <Search className="h-4 sm:h-6 w-4 sm:w-6 text-gray-400" />
                   ) : (
-                    <Users className="h-8 w-8 text-gray-400" />
+                    <Users className="h-4 sm:h-6 w-4 sm:w-6 text-gray-400" />
                   )}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1 sm:mb-2">
                   {searchTerm ? "No participants found" : "No participants yet"}
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
                   {searchTerm ? "Try adjusting your search terms" : "Participants will appear here once they enroll"}
                 </p>
               </div>
             </div>
           ) : training.status === "completed" ? (
             <Tabs defaultValue="all" className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 mb-4 p-1 rounded-lg">
+              <TabsList className="flex overflow-x-auto sm:grid sm:grid-cols-2 md:grid-cols-4 w-full bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 mb-2 sm:mb-4 p-0.5 sm:p-1 rounded-md space-x-1 sm:space-x-0">
                 <TabsTrigger
                   value="all"
-                  className="text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-blue-400"
+                  className="flex-1 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-blue-300 px-1 sm:px-2 py-0.5 sm:py-1 whitespace-nowrap"
                 >
                   All ({filteredParticipants.length})
                 </TabsTrigger>
@@ -344,9 +320,8 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
                     <TabsTrigger
                       key={level}
                       value={level}
-                      className="text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-blue-400"
+                      className="flex-1 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-blue-300 px-1 sm:px-2 py-0.5 sm:py-1 whitespace-nowrap"
                     >
-                      <span className="hidden sm:inline mr-1">{config.emoji}</span>
                       {config.label} ({parts.length})
                     </TabsTrigger>
                   )
@@ -354,13 +329,11 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
               </TabsList>
 
               <TabsContent value="all" className="flex-1 overflow-hidden mt-0">
-                <ScrollArea className="h-full pr-2 sm:pr-4">
-                  <div className="space-y-4">
-                    <AnimatePresence>
-                      {filteredParticipants.map((participant, index) => (
-                        <ParticipantCard key={participant.id} participant={participant} index={index} />
-                      ))}
-                    </AnimatePresence>
+                <ScrollArea className="h-full pr-1 sm:pr-2">
+                  <div className="space-y-2 sm:space-y-4">
+                    {filteredParticipants.map((participant) => (
+                      <ParticipantCard key={participant.id} participant={participant} />
+                    ))}
                   </div>
                 </ScrollArea>
               </TabsContent>
@@ -372,22 +345,20 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
                     {parts.length === 0 ? (
                       <div className="flex items-center justify-center h-full">
                         <div className="text-center">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${config.avatarColor}`}>
-                            <config.icon className="h-6 w-6 text-white" />
+                          <div className={`w-8 sm:w-10 h-8 sm:h-10 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2 ${config.color}`}>
+                            <config.icon className="h-4 sm:h-5 w-4 sm:w-5 text-white" />
                           </div>
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                          <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1 sm:mb-1">
                             No {config.label.toLowerCase()} participants
                           </h3>
                         </div>
                       </div>
                     ) : (
-                      <ScrollArea className="h-full pr-2 sm:pr-4">
-                        <div className="space-y-4">
-                          <AnimatePresence>
-                            {parts.map((participant, index) => (
-                              <ParticipantCard key={participant.id} participant={participant} index={index} />
-                            ))}
-                          </AnimatePresence>
+                      <ScrollArea className="h-full pr-1 sm:pr-2">
+                        <div className="space-y-2 sm:space-y-4">
+                          {parts.map((participant) => (
+                            <ParticipantCard key={participant.id} participant={participant} />
+                          ))}
                         </div>
                       </ScrollArea>
                     )}
@@ -396,13 +367,11 @@ export function TrainingParticipantsView({ training, onUpdate }: TrainingPartici
               })}
             </Tabs>
           ) : (
-            <ScrollArea className="h-full pr-2 sm:pr-4">
-              <div className="space-y-4">
-                <AnimatePresence>
-                  {filteredParticipants.map((participant, index) => (
-                    <ParticipantCard key={participant.id} participant={participant} index={index} />
-                  ))}
-                </AnimatePresence>
+            <ScrollArea className="h-full pr-1 sm:pr-2">
+              <div className="space-y-2 sm:space-y-4">
+                {filteredParticipants.map((participant) => (
+                  <ParticipantCard key={participant.id} participant={participant} />
+                ))}
               </div>
             </ScrollArea>
           )}

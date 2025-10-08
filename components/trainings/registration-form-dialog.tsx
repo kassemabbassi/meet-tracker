@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,7 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { UserPlus, Sparkles, GraduationCap } from "lucide-react"
+import { UserPlus, GraduationCap } from "lucide-react"
 import { trainingRegistrationService, type Training } from "@/lib/supabase"
 
 interface RegistrationFormDialogProps {
@@ -95,39 +94,30 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg font-bold">
-            <UserPlus className="h-4 w-4 mr-2" />
-            Add Participant
-          </Button>
-        </motion.div>
+        <Button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-md flex items-center">
+          <UserPlus className="h-4 w-4 mr-2" />
+          Add Participant
+        </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[700px] max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-green-50/30 to-emerald-50/30 dark:from-slate-800 dark:via-green-900/20 dark:to-emerald-900/20 border-2 border-green-300 dark:border-green-700 mx-2 shadow-2xl">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-6">
         <DialogHeader>
-          <motion.div
-            className="flex items-center justify-center mb-4"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-          >
-            <motion.div
-              className="p-4 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl shadow-2xl"
-              whileHover={{ scale: 1.1, rotate: 5 }}
-            >
-              <GraduationCap className="h-8 w-8 text-white" />
-            </motion.div>
-          </motion.div>
-          <DialogTitle className="text-2xl text-center bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent font-bold">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-3 bg-green-600 rounded-full">
+              <GraduationCap className="h-6 w-6 text-white" />
+            </div>
+          </div>
+          <DialogTitle className="text-xl sm:text-2xl text-center font-semibold text-gray-900 dark:text-white">
             Add New Participant
           </DialogTitle>
-          <DialogDescription className="text-center text-slate-600 dark:text-slate-300">
+          <DialogDescription className="text-center text-gray-600 dark:text-gray-300 text-sm sm:text-base">
             {training.title}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-6 py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="first_name" className="text-sm font-bold">
+              <Label htmlFor="first_name" className="text-sm font-medium text-gray-700 dark:text-gray-200">
                 First Name *
               </Label>
               <Input
@@ -135,11 +125,11 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
                 value={formData.first_name}
                 onChange={(e) => handleChange("first_name", e.target.value)}
                 placeholder="John"
-                className="h-11 border-2 border-green-200 dark:border-green-700 focus:ring-green-500"
+                className="mt-1 h-10 border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500"
               />
             </div>
             <div>
-              <Label htmlFor="last_name" className="text-sm font-bold">
+              <Label htmlFor="last_name" className="text-sm font-medium text-gray-700 dark:text-gray-200">
                 Last Name *
               </Label>
               <Input
@@ -147,13 +137,13 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
                 value={formData.last_name}
                 onChange={(e) => handleChange("last_name", e.target.value)}
                 placeholder="Doe"
-                className="h-11 border-2 border-green-200 dark:border-green-700 focus:ring-green-500"
+                className="mt-1 h-10 border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="email" className="text-sm font-bold">
+            <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-200">
               Email *
             </Label>
             <Input
@@ -162,12 +152,12 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
               value={formData.email}
               onChange={(e) => handleChange("email", e.target.value)}
               placeholder="john.doe@example.com"
-              className="h-11 border-2 border-green-200 dark:border-green-700 focus:ring-green-500"
+              className="mt-1 h-10 border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500"
             />
           </div>
 
           <div>
-            <Label htmlFor="phone" className="text-sm font-bold">
+            <Label htmlFor="phone" className="text-sm font-medium text-gray-700 dark:text-gray-200">
               Phone Number
             </Label>
             <Input
@@ -176,16 +166,16 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
               value={formData.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
               placeholder="+216 12 345 678"
-              className="h-11 border-2 border-green-200 dark:border-green-700 focus:ring-green-500"
+              className="mt-1 h-10 border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500"
             />
           </div>
 
           <div>
-            <Label htmlFor="education_specialty" className="text-sm font-bold">
+            <Label htmlFor="education_specialty" className="text-sm font-medium text-gray-700 dark:text-gray-200">
               Education Specialty *
             </Label>
             <Select value={formData.education_specialty} onValueChange={(value) => handleChange("education_specialty", value)}>
-              <SelectTrigger className="h-11 border-2 border-green-200 dark:border-green-700">
+              <SelectTrigger className="mt-1 h-10 border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500">
                 <SelectValue placeholder="Select education specialty" />
               </SelectTrigger>
               <SelectContent>
@@ -209,11 +199,11 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
           </div>
 
           <div>
-            <Label htmlFor="education_level" className="text-sm font-bold">
+            <Label htmlFor="education_level" className="text-sm font-medium text-gray-700 dark:text-gray-200">
               Education Level *
             </Label>
             <Select value={formData.education_level} onValueChange={(value) => handleChange("education_level", value)}>
-              <SelectTrigger className="h-11 border-2 border-green-200 dark:border-green-700">
+              <SelectTrigger className="mt-1 h-10 border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500">
                 <SelectValue placeholder="Select education level" />
               </SelectTrigger>
               <SelectContent>
@@ -225,20 +215,20 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
           </div>
 
           <div>
-            <Label className="text-sm font-bold mb-3 block">
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">
               Member Type *
             </Label>
-            <RadioGroup value={formData.member_type} onValueChange={(value) => handleChange("member_type", value)}>
-              <div className="flex items-center space-x-6">
+            <RadioGroup value={formData.member_type} onValueChange={(value) => handleChange("member_type", value)} className="mt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-3 sm:space-y-0">
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="adherent" id="adherent" className="border-green-500 text-green-500" />
-                  <Label htmlFor="adherent" className="cursor-pointer font-normal">
+                  <RadioGroupItem value="adherent" id="adherent" className="border-gray-400 text-green-600" />
+                  <Label htmlFor="adherent" className="cursor-pointer text-sm text-gray-700 dark:text-gray-200">
                     Adherent Member
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="actif" id="actif" className="border-green-500 text-green-500" />
-                  <Label htmlFor="actif" className="cursor-pointer font-normal">
+                  <RadioGroupItem value="actif" id="actif" className="border-gray-400 text-green-600" />
+                  <Label htmlFor="actif" className="cursor-pointer text-sm text-gray-700 dark:text-gray-200">
                     Active Member
                   </Label>
                 </div>
@@ -247,57 +237,51 @@ export function RegistrationFormDialog({ training, onRegistrationSuccess }: Regi
           </div>
 
           <div>
-            <Label htmlFor="training_level" className="text-sm font-bold">
+            <Label htmlFor="training_level" className="text-sm font-medium text-gray-700 dark:text-gray-200">
               Training Level
             </Label>
             <Select value={formData.training_level} onValueChange={(value) => handleChange("training_level", value)}>
-              <SelectTrigger className="h-11 border-2 border-green-200 dark:border-green-700">
+              <SelectTrigger className="mt-1 h-10 border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500">
                 <SelectValue placeholder="Select training level (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="beginner">🌱 Beginner</SelectItem>
-                <SelectItem value="intermediate">🚀 Intermediate</SelectItem>
-                <SelectItem value="advanced">⭐ Advanced</SelectItem>
+                <SelectItem value="beginner">Beginner</SelectItem>
+                <SelectItem value="intermediate">Intermediate</SelectItem>
+                <SelectItem value="advanced">Advanced</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        <DialogFooter className="gap-3">
+        <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <Button
             variant="outline"
             onClick={() => setIsOpen(false)}
             disabled={isLoading}
-            className="border-2 border-green-200 dark:border-green-700"
+            className="w-full sm:w-auto border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             Cancel
           </Button>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 sm:flex-initial">
-            <Button
-              onClick={handleSubmit}
-              disabled={
-                !formData.first_name ||
-                !formData.last_name ||
-                !formData.email ||
-                !formData.education_specialty ||
-                !formData.education_level ||
-                !formData.member_type ||
-                isLoading
-              }
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-xl h-11 font-bold"
-            >
-              {isLoading ? (
-                <motion.div
-                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                />
-              ) : (
-                <Sparkles className="h-5 w-5 mr-2" />
-              )}
-              {isLoading ? "Adding..." : "Add Participant"}
-            </Button>
-          </motion.div>
+          <Button
+            onClick={handleSubmit}
+            disabled={
+              !formData.first_name ||
+              !formData.last_name ||
+              !formData.email ||
+              !formData.education_specialty ||
+              !formData.education_level ||
+              !formData.member_type ||
+              isLoading
+            }
+            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold h-10"
+          >
+            {isLoading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+            ) : (
+              <UserPlus className="h-5 w-5 mr-2" />
+            )}
+            {isLoading ? "Adding..." : "Add Participant"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

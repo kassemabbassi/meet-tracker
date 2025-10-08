@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -42,28 +41,6 @@ interface TrainingsManagementProps {
   user: AppUser
 }
 
-const floatingVariants = {
-  animate: {
-    y: [-10, 10, -10],
-    transition: {
-      duration: 3,
-      repeat: Number.POSITIVE_INFINITY,
-      ease: "easeInOut",
-    },
-  },
-}
-
-const shimmerVariants = {
-  animate: {
-    backgroundPosition: ["200% 0%", "-200% 0%"],
-    transition: {
-      duration: 8,
-      repeat: Number.POSITIVE_INFINITY,
-      ease: "linear",
-    },
-  },
-}
-
 export function TrainingsManagement({ user }: TrainingsManagementProps) {
   const [trainings, setTrainings] = useState<Training[]>([])
   const [participantCounts, setParticipantCounts] = useState<Record<string, number>>({})
@@ -71,6 +48,7 @@ export function TrainingsManagement({ user }: TrainingsManagementProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "completed">("all")
   const [trainingToComplete, setTrainingToComplete] = useState<string | null>(null)
+  const [trainingToDelete, setTrainingToDelete] = useState<string | null>(null)
   const [isCompleting, setIsCompleting] = useState(false)
 
   useEffect(() => {
@@ -116,32 +94,35 @@ export function TrainingsManagement({ user }: TrainingsManagementProps) {
     }
   }
 
-  const handleDeleteTraining = async (trainingId: string) => {
-    const success = await trainingService.deleteTraining(user.id, user.email, trainingId)
+  const handleDeleteTraining = async () => {
+    if (!trainingToDelete) return
+
+    const success = await trainingService.deleteTraining(user.id, user.email, trainingToDelete)
     if (success) {
-      setTrainings((prev) => prev.filter((t) => t.id !== trainingId))
+      setTrainings((prev) => prev.filter((t) => t.id !== trainingToDelete))
     }
+    setTrainingToDelete(null)
   }
 
   const getStatusBadge = (status: Training["status"]) => {
     switch (status) {
       case "active":
         return (
-          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg border-0">
+          <Badge className="bg-green-600 text-white">
             <PlayCircle className="h-3 w-3 mr-1" />
             Active
           </Badge>
         )
       case "completed":
         return (
-          <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg border-0">
+          <Badge className="bg-blue-600 text-white">
             <CheckCircle className="h-3 w-3 mr-1" />
             Completed
           </Badge>
         )
       default:
         return (
-          <Badge className="bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg border-0">
+          <Badge className="bg-gray-500 text-white">
             <AlertCircle className="h-3 w-3 mr-1" />
             {status}
           </Badge>
@@ -165,126 +146,96 @@ export function TrainingsManagement({ user }: TrainingsManagementProps) {
   const totalParticipants = Object.values(participantCounts).reduce((sum, count) => sum + count, 0)
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header with Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-8 shadow-2xl"
-      >
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-          variants={shimmerVariants}
-          animate="animate"
-          style={{ backgroundSize: "200% 100%" }}
-        />
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <motion.div
-                className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl shadow-xl"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <GraduationCap className="h-8 w-8 text-white" />
-              </motion.div>
+      <div className="rounded-lg bg-indigo-600 p-6 shadow-md">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-white/20 rounded-lg">
+              <GraduationCap className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-white mb-1">Training Management</h2>
+              <p className="text-white/90 text-base">Create and manage professional training programs</p>
+            </div>
+          </div>
+          <CreateTrainingDialog userId={user.id} userEmail={user.email} onTrainingCreated={handleTrainingCreated} />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white/10 rounded-lg p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-1">Training Management</h2>
-                <p className="text-white/90 text-lg">Create and manage professional training programs</p>
+                <p className="text-white/80 text-sm font-medium mb-1">Active Programs</p>
+                <p className="text-3xl font-bold text-white">{activeCount}</p>
+              </div>
+              <div className="p-2 bg-green-600/30 rounded-lg">
+                <PlayCircle className="h-5 w-5 text-white" />
               </div>
             </div>
-            <CreateTrainingDialog userId={user.id} userEmail={user.email} onTrainingCreated={handleTrainingCreated} />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <motion.div
-              whileHover={{ scale: 1.05, y: -5 }}
-              className="bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/30 shadow-xl"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/80 text-sm font-medium mb-1">Active Programs</p>
-                  <p className="text-4xl font-bold text-white">{activeCount}</p>
-                </div>
-                <div className="p-3 bg-green-500/30 rounded-xl">
-                  <PlayCircle className="h-6 w-6 text-white" />
-                </div>
+          <div className="bg-white/10 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/80 text-sm font-medium mb-1">Completed</p>
+                <p className="text-3xl font-bold text-white">{completedCount}</p>
               </div>
-            </motion.div>
+              <div className="p-2 bg-blue-600/30 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-white" />
+              </div>
+            </div>
+          </div>
 
-            <motion.div
-              whileHover={{ scale: 1.05, y: -5 }}
-              className="bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/30 shadow-xl"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/80 text-sm font-medium mb-1">Completed</p>
-                  <p className="text-4xl font-bold text-white">{completedCount}</p>
-                </div>
-                <div className="p-3 bg-blue-500/30 rounded-xl">
-                  <CheckCircle className="h-6 w-6 text-white" />
-                </div>
+          <div className="bg-white/10 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/80 text-sm font-medium mb-1">Total Enrolled</p>
+                <p className="text-3xl font-bold text-white">{totalParticipants}</p>
               </div>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.05, y: -5 }}
-              className="bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/30 shadow-xl"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/80 text-sm font-medium mb-1">Total Enrolled</p>
-                  <p className="text-4xl font-bold text-white">{totalParticipants}</p>
-                </div>
-                <div className="p-3 bg-purple-500/30 rounded-xl">
-                  <Users className="h-6 w-6 text-white" />
-                </div>
+              <div className="p-2 bg-purple-600/30 rounded-lg">
+                <Users className="h-5 w-5 text-white" />
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Search and Filter */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-6 border-2 border-purple-200 dark:border-purple-700 shadow-xl"
-      >
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-purple-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search trainings by name, description, or location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 h-14 text-base border-2 border-purple-200 dark:border-purple-700 focus:ring-purple-500 bg-white dark:bg-slate-800 rounded-xl shadow-lg"
+              className="pl-10 h-10 border-gray-300 dark:border-gray-600 focus:ring-indigo-500 bg-white dark:bg-gray-700 rounded-md"
             />
           </div>
           <Tabs
             value={filterStatus}
             onValueChange={(v) => setFilterStatus(v as typeof filterStatus)}
-            className="w-full md:w-auto"
+            className="w-full sm:w-auto"
           >
-            <TabsList className="grid w-full md:w-auto grid-cols-3 h-14 bg-purple-100 dark:bg-purple-900/30 rounded-xl p-1">
+            <TabsList className="grid w-full sm:w-auto grid-cols-3 bg-gray-100 dark:bg-gray-700 rounded-md p-1">
               <TabsTrigger
                 value="all"
-                className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-lg"
+                className="rounded-sm data-[state=active]:bg-white data-[state=active]:text-indigo-600 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-indigo-300"
               >
                 <Filter className="h-4 w-4 mr-2" />
                 All ({trainings.length})
               </TabsTrigger>
               <TabsTrigger
                 value="active"
-                className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-lg"
+                className="rounded-sm data-[state=active]:bg-white data-[state=active]:text-indigo-600 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-indigo-300"
               >
                 <PlayCircle className="h-4 w-4 mr-2" />
                 Active ({activeCount})
               </TabsTrigger>
               <TabsTrigger
                 value="completed"
-                className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-lg"
+                className="rounded-sm data-[state=active]:bg-white data-[state=active]:text-indigo-600 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-indigo-300"
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Completed ({completedCount})
@@ -292,38 +243,26 @@ export function TrainingsManagement({ user }: TrainingsManagementProps) {
             </TabsList>
           </Tabs>
         </div>
-      </motion.div>
+      </div>
 
       {/* Trainings List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <motion.div
-            className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-          />
+        <div className="flex items-center justify-center py-16">
+          <div className="w-12 h-12 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : filteredTrainings.length === 0 ? (
-        <motion.div
-          className="text-center py-20"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <motion.div
-            className="mx-auto w-32 h-32 bg-gradient-to-br from-purple-400 via-pink-500 to-rose-500 rounded-full flex items-center justify-center mb-6 shadow-2xl"
-            variants={floatingVariants}
-            animate="animate"
-          >
+        <div className="text-center py-16">
+          <div className="mx-auto w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mb-4">
             {searchTerm || filterStatus !== "all" ? (
-              <Search className="h-16 w-16 text-white" />
+              <Search className="h-10 w-10 text-white" />
             ) : (
-              <GraduationCap className="h-16 w-16 text-white" />
+              <GraduationCap className="h-10 w-10 text-white" />
             )}
-          </motion.div>
-          <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          </div>
+          <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             {searchTerm || filterStatus !== "all" ? "No trainings found" : "No trainings yet"}
           </h3>
-          <p className="text-slate-600 dark:text-slate-300 text-lg mb-6">
+          <p className="text-gray-600 dark:text-gray-300 text-base mb-4">
             {searchTerm || filterStatus !== "all"
               ? "Try adjusting your search or filters"
               : "Create your first training program to get started"}
@@ -331,228 +270,178 @@ export function TrainingsManagement({ user }: TrainingsManagementProps) {
           {!searchTerm && filterStatus === "all" && (
             <CreateTrainingDialog userId={user.id} userEmail={user.email} onTrainingCreated={handleTrainingCreated} />
           )}
-        </motion.div>
+        </div>
       ) : (
-        <ScrollArea className="h-[700px] pr-4">
-          <div className="space-y-6">
-            <AnimatePresence>
-              {filteredTrainings.map((training, index) => (
-                <motion.div
-                  key={training.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ scale: 1.02, y: -4 }}
-                  className="group"
-                >
-                  <Card className="bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 dark:from-slate-800 dark:via-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-700 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                    <CardHeader className="relative bg-gradient-to-r from-purple-100/50 via-pink-100/50 to-rose-100/50 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-rose-900/30 border-b-2 border-purple-200 dark:border-purple-700 pb-6">
-                      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-                        <div className="flex-1 space-y-4">
-                          <div className="flex items-start gap-4">
-                            <motion.div
-                              className="p-4 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-2xl shadow-xl flex-shrink-0"
-                              whileHover={{ scale: 1.1, rotate: 5 }}
-                              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                            >
-                              <GraduationCap className="h-7 w-7 text-white" />
-                            </motion.div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                <CardTitle className="text-2xl lg:text-3xl text-slate-800 dark:text-slate-100">
-                                  {training.title}
-                                </CardTitle>
-                                {getStatusBadge(training.status)}
-                                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-lg">
-                                  <Users className="h-3 w-3 mr-1" />
-                                  {participantCounts[training.id] || 0} enrolled
-                                </Badge>
-                              </div>
-                              {training.description && (
-                                <CardDescription className="text-base text-slate-700 dark:text-slate-300 line-clamp-2">
-                                  {training.description}
-                                </CardDescription>
-                              )}
-                            </div>
-                          </div>
+        <ScrollArea className="h-[600px]">
+          <div className="space-y-4 pr-4">
+            {filteredTrainings.map((training) => (
+              <Card key={training.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md">
+                <CardHeader className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="p-3 bg-indigo-600 rounded-lg flex-shrink-0">
+                          <GraduationCap className="h-6 w-6 text-white" />
                         </div>
-
-                        <div className="flex flex-wrap gap-3">
-                          <TrainingCollaboratorsView training={training} currentUserEmail={user.email} />
-                          <TrainingParticipantsView training={training} onUpdate={loadTrainings} />
-                          {training.status === "active" && (
-                            <>
-                              <RegistrationFormDialog training={training} onRegistrationSuccess={loadTrainings} />
-                              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <Button
-                                  onClick={() => setTrainingToComplete(training.id)}
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-white/80 dark:bg-slate-800/80 border-2 border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/50 text-blue-600 shadow-lg"
-                                >
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                  Complete
-                                </Button>
-                              </motion.div>
-                            </>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-2 flex-wrap">
+                            <CardTitle className="text-xl lg:text-2xl text-gray-900 dark:text-gray-100">
+                              {training.title}
+                            </CardTitle>
+                            {getStatusBadge(training.status)}
+                            <Badge className="bg-purple-600 text-white">
+                              <Users className="h-3 w-3 mr-1" />
+                              {participantCounts[training.id] || 0} enrolled
+                            </Badge>
+                          </div>
+                          {training.description && (
+                            <CardDescription className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                              {training.description}
+                            </CardDescription>
                           )}
-                          <motion.div whileHover={{ scale: 1.05, rotate: 5 }} whileTap={{ scale: 0.95 }}>
-                            <Button
-                              onClick={() => handleDeleteTraining(training.id)}
-                              variant="outline"
-                              size="sm"
-                              className="bg-white/80 dark:bg-slate-800/80 border-2 border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/50 text-red-600 shadow-lg"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </motion.div>
                         </div>
                       </div>
-                    </CardHeader>
+                    </div>
 
-                    <CardContent className="p-6 space-y-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {training.start_date && (
-                          <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            className="flex items-center gap-3 p-4 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl border border-purple-300 dark:border-purple-700 shadow-lg"
+                    <div className="flex flex-wrap gap-2">
+                      <TrainingCollaboratorsView training={training} currentUserEmail={user.email} />
+                      <TrainingParticipantsView training={training} onUpdate={loadTrainings} />
+                      {training.status === "active" && (
+                        <>
+                          <RegistrationFormDialog training={training} onRegistrationSuccess={loadTrainings} />
+                          <Button
+                            onClick={() => setTrainingToComplete(training.id)}
+                            variant="outline"
+                            size="sm"
+                            className="border-blue-300 dark:border-blue-600 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-800/50"
                           >
-                            <div className="p-2 bg-purple-500 rounded-lg">
-                              <Calendar className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wide">
-                                Start Date
-                              </p>
-                              <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
-                                {new Date(training.start_date).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                })}
-                              </p>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {training.duration && (
-                          <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl border border-blue-300 dark:border-blue-700 shadow-lg"
-                          >
-                            <div className="p-2 bg-blue-500 rounded-lg">
-                              <Clock className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide">
-                                Duration
-                              </p>
-                              <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
-                                {training.duration}
-                              </p>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {training.location && (
-                          <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            className="flex items-center gap-3 p-4 bg-gradient-to-br from-pink-100 to-pink-200 dark:from-pink-900/30 dark:to-pink-800/30 rounded-xl border border-pink-300 dark:border-pink-700 shadow-lg"
-                          >
-                            <div className="p-2 bg-pink-500 rounded-lg">
-                              <MapPin className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-medium text-pink-700 dark:text-pink-300 uppercase tracking-wide">
-                                Location
-                              </p>
-                              <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
-                                {training.location}
-                              </p>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {training.max_participants && (
-                          <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 rounded-xl border border-green-300 dark:border-green-700 shadow-lg"
-                          >
-                            <div className="p-2 bg-green-500 rounded-lg">
-                              <Users className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-medium text-green-700 dark:text-green-300 uppercase tracking-wide">
-                                Capacity
-                              </p>
-                              <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                                {participantCounts[training.id] || 0} / {training.max_participants}
-                              </p>
-                            </div>
-                          </motion.div>
-                        )}
-                      </div>
-
-                      {training.objectives && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="p-5 bg-gradient-to-r from-purple-50 via-pink-50 to-rose-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-rose-900/20 rounded-xl border-2 border-purple-200 dark:border-purple-700 shadow-lg"
-                        >
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
-                              <Target className="h-4 w-4 text-white" />
-                            </div>
-                            <h4 className="font-bold text-lg text-slate-800 dark:text-slate-100">
-                              Learning Objectives
-                            </h4>
-                          </div>
-                          <p className="text-slate-700 dark:text-slate-200 leading-relaxed">{training.objectives}</p>
-                        </motion.div>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Complete
+                          </Button>
+                        </>
                       )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                      <Button
+                        onClick={() => setTrainingToDelete(training.id)}
+                        variant="outline"
+                        size="sm"
+                        className="border-red-300 dark:border-red-600 text-red-600 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-800/50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="p-4 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {training.start_date && (
+                      <div className="flex items-center gap-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-md border border-purple-200 dark:border-purple-700">
+                        <div className="p-1.5 bg-purple-600 rounded">
+                          <Calendar className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-purple-700 dark:text-purple-300">Start Date</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                            {new Date(training.start_date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {training.duration && (
+                      <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-700">
+                        <div className="p-1.5 bg-blue-600 rounded">
+                          <Clock className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-blue-700 dark:text-blue-300">Duration</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                            {training.duration}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {training.location && (
+                      <div className="flex items-center gap-2 p-3 bg-pink-50 dark:bg-pink-900/20 rounded-md border border-pink-200 dark:border-pink-700">
+                        <div className="p-1.5 bg-pink-600 rounded">
+                          <MapPin className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-pink-700 dark:text-pink-300">Location</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                            {training.location}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {training.max_participants && (
+                      <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-md border border-green-200 dark:border-green-700">
+                        <div className="p-1.5 bg-green-600 rounded">
+                          <Users className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-green-700 dark:text-green-300">Capacity</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            {participantCounts[training.id] || 0} / {training.max_participants}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {training.objectives && (
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-md border border-purple-200 dark:border-purple-700">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-1.5 bg-purple-600 rounded">
+                          <Target className="h-4 w-4 text-white" />
+                        </div>
+                        <h4 className="font-semibold text-base text-gray-900 dark:text-gray-100">
+                          Learning Objectives
+                        </h4>
+                      </div>
+                      <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">{training.objectives}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </ScrollArea>
       )}
 
       {/* Complete Training Confirmation Dialog */}
       <AlertDialog open={!!trainingToComplete} onOpenChange={(open) => !open && setTrainingToComplete(null)}>
-        <AlertDialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border-2 border-blue-300 dark:border-blue-700">
+        <AlertDialogContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-3 text-2xl">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl">
-                <CheckCircle className="h-6 w-6 text-white" />
+            <AlertDialogTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 bg-blue-600 rounded">
+                <CheckCircle className="h-5 w-5 text-white" />
               </div>
               <span>Complete Training?</span>
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-base text-slate-600 dark:text-slate-300 pt-2">
+            <AlertDialogDescription className="text-sm text-gray-600 dark:text-gray-300 pt-2">
               Are you sure you want to mark this training as completed? This action will change the training status and
               participants will be grouped by their skill levels.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isCompleting} className="border-2 border-slate-300 dark:border-slate-700">
+            <AlertDialogCancel disabled={isCompleting} className="border-gray-300 dark:border-gray-600">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCompleteTraining}
               disabled={isCompleting}
-              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isCompleting ? (
                 <>
-                  <motion.div
-                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                  />
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                   Completing...
                 </>
               ) : (
@@ -561,6 +450,35 @@ export function TrainingsManagement({ user }: TrainingsManagementProps) {
                   Complete Training
                 </>
               )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Training Confirmation Dialog */}
+      <AlertDialog open={!!trainingToDelete} onOpenChange={(open) => !open && setTrainingToDelete(null)}>
+        <AlertDialogContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 bg-red-600 rounded">
+                <Trash2 className="h-5 w-5 text-white" />
+              </div>
+              <span>Delete Training?</span>
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-gray-600 dark:text-gray-300 pt-2">
+              Are you sure you want to delete this training? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-gray-300 dark:border-gray-600">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTraining}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Training
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
